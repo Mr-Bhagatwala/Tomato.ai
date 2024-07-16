@@ -1,9 +1,21 @@
 import { createContext, useEffect, useState } from "react";
 import { food_list } from "../assets/frontend_assets/assets";
+import axios from "axios";
+
 export const StoreContext = createContext(null);
 
+
+const url = "http://localhost:4000"
+
 const StoreContextProvider = (props) => {
+
+  const url = "http://localhost:4000"
+  const [token,setToken] = useState("");
   const [cartItems, setCartItems] = useState({});
+  const [food_list,setFoodList] = useState([])
+
+
+
   const addToCart = (itemId) => {
     if (!cartItems[itemId]) {
       setCartItems((prev) => ({ ...prev, [itemId]: 1 }));
@@ -32,13 +44,36 @@ const StoreContextProvider = (props) => {
     return totalAmount
   };
 
+  const fetchFoodList = async () => {
+    const response = await axios.get(url+"/api/food/list")
+    setFoodList(response.data.data)
+  }
+
+
+  useEffect(()=>{
+      
+
+      async function loadData(){
+        await fetchFoodList();
+        if(localStorage.getItem("token")){
+          setToken(localStorage.getItem("token"))
+        }
+      }
+
+      loadData();
+  },[])//here we check if token is exist in local stoarge if yes then we store in setToken 
+  //here basically we are doing for after relod we will be in login state not logout state 
+
   const contextValue = {
     food_list,
     cartItems,
     setCartItems,
     addToCart,
     removeFromCart,
-    getTotalCartAmount
+    getTotalCartAmount,
+    url,
+    token,
+    setToken
   };
   return (
     <StoreContext.Provider value={contextValue}>
