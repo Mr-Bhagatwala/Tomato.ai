@@ -18,7 +18,7 @@ const placeOrder = async (req,res) =>{
 
         const line_items = req.body.items.map((item)=>({
             price_data :{
-                ccurrency : "inr",
+                currency : "inr",
                 product_data : {
                     name:item.name
                 },
@@ -50,6 +50,23 @@ const placeOrder = async (req,res) =>{
         res.json({success:false,message : "error while payment "})
     }
 }
+
+const verifyOrder = async (req,res) =>{
+    const {orderId , success} =req.body;
+
+    try {
+        if(success == "true"){
+            await orderModel.findByIdAndUpdate(orderId,{payment : true})
+            res.json({success:true,message:"Payment successful"})
+        }else{
+            await orderModel.findByIdAndDelete(orderId)
+            res.json({success:false,message:"Payment unsuccessful"})
+        }
+    } catch (error) {
+       console.log(error)
+       res.json({success:false,message:"error while payment"})
+    }
+}
 export {
-    placeOrder
+    placeOrder , verifyOrder
 }
